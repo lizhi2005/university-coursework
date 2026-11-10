@@ -1,0 +1,98 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <ul>
+        <li>别和我犟嘴</li>
+        <li>AAA鸡蛋批发</li>
+         <li>sin</li>
+         <li>liberal</li>
+    </ul>
+
+    <ol>
+        <li>喜羊羊</li>
+        <li>懒羊羊</li>
+        <li>灰太狼</li>
+        <li>村长</li>
+    </ol>
+<style>
+/* 清除默认缩进、换行，实现一行并列 */
+dl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+dt {
+  font-weight: bold;
+  min-width: 80px;
+}
+dd {
+  margin: 0; /* 清除dd默认左边距 */
+  display: inline;
+  margin-right: 16px;
+}
+</style>
+    <dt>服务中心</dt>
+    <dd>抖音</dd>
+    <dd>小红书</dd>
+    <dd>微博</dd>
+        <dt>戒网所</dt>
+        <dd>原神</dd>
+        <dd>王者荣耀</dd>
+        <dd>瓦洛兰特</dd>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<style>
+/* 外层容器：开启弹性多栏横向排列 */
+.dl-wrap {
+  display: flex;
+  gap: 60px; /* 栏目之间间距，和微软页脚一致 */
+  background: #f5f5f5;
+  padding: 40px 30px;
+}
+/* 每组dt+dd单独一栏 */
+dl {
+  margin: 0;
+}
+/* 栏目标题加粗放大 */
+dt {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+/* 每一行链接/条目，垂直排列 */
+dd {
+  margin: 0 0 14px 0;
+  font-size: 18px;
+  color: #333;
+}
+</style>
+</head>
+<body>
+<div class="dl-wrap">
+  <!-- 第一栏 -->
+  <dl>
+    <dt>服务中心</dt>
+    <dd>抖音</dd>
+    <dd>小红书</dd>
+    <dd>微博</dd>
+  </dl>
+  <!-- 第二栏 -->
+  <dl>
+    <dt>戒网所</dt>
+    <dd>原神</dd>
+    <dd>王者荣耀</dd>
+    <dd>瓦洛兰特</dd>
+  </dl>
+</div>
+</body>
+</html>

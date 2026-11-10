@@ -1,0 +1,43 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: CntrlOtherPrcss - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x804 /fo"Release/CntrlOtherPrcss.res" /d "NDEBUG" /d "_AFXDLL" "D:\CppStudy\CntrlOtherPrcss\CntrlOtherPrcss.rc"" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP17.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Release/" /Fp"Release/CntrlOtherPrcss.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\CppStudy\CntrlOtherPrcss\CntrlOtherPrcss.cpp"
+"D:\CppStudy\CntrlOtherPrcss\CntrlOtherPrcssDlg.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP17.tmp" 
+Creating temporary file "C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP18.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Release/" /Fp"Release/CntrlOtherPrcss.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\CppStudy\CntrlOtherPrcss\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP18.tmp" 
+Creating command line "link.exe /nologo /subsystem:windows /incremental:no /pdb:"Release/CntrlOtherPrcss.pdb" /machine:I386 /out:"Release/CntrlOtherPrcss.exe"  .\Release\CntrlOtherPrcss.obj .\Release\CntrlOtherPrcssDlg.obj .\Release\StdAfx.obj .\Release\CntrlOtherPrcss.res "
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+CntrlOtherPrcss.cpp
+CntrlOtherPrcssDlg.cpp
+Generating Code...
+Linking...
+Creating command line "bscmake.exe /nologo /o"Release/CntrlOtherPrcss.bsc"  .\Release\StdAfx.sbr .\Release\CntrlOtherPrcss.sbr .\Release\CntrlOtherPrcssDlg.sbr"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+CntrlOtherPrcss.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

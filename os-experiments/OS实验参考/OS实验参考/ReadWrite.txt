@@ -1,0 +1,349 @@
+#include <stdlib.h>
+
+#include <windows.h>
+
+ 
+
+#include "Reader-Writer.h"
+
+#include "Semaphore.h"
+
+ 
+
+// 这是 Windows 下多线程工作的 P 操作
+
+#define P(S) WaitForSingleObject(S, INFINITE)
+
+ 
+
+// 这是 Windows 下多线程工作的 V 操作
+
+#define V(S) ReleaseSemaphore(S, 1, NULL)
+
+ 
+
+const int RN = 5; // 所有读者总数
+
+const int WN = 3; // 所有写者总数
+
+ 
+
+HANDLE Sdoc; // 文档信号量——互斥量
+
+HANDLE Sr;   // 读者信号量——广义信号量
+
+ 
+
+HANDLE Scnt; // 保护 g_cntReader 的互斥量
+
+int g_cntReader = 0; // 读者个数计数器
+
+ 
+
+// ##############+. Descripted By Tang Houjian [2003-9-26 20:10:49] .+##########
+
+// |  funcname  :  JustWait ( ) 
+
+// +  note      :  显示一些信息，让后等待
+
+// |               
+
+// +-----------------------------------------------------------------+
+
+// |  ret val   :  void 
+
+// |               
+
+// +  Parameter :  
+
+// |         [    int ] - nReader 读者（写者）编号，读者>0，写者<0
+
+// |         [    int ] - min     操作等待的最短时间
+
+// |         [    int ] - max     操作等待得最长时间，实际等待的时间介于两者之间
+
+// |         [ LPCSTR ] - info    要显示的信息
+
+void JustWait(int nReader, int min, int max, LPCSTR info)
+
+// +-----------------------------------------------------------------+
+
+{
+
+    // 等待时间的基本量，以毫秒表示
+
+    const int BASETIME = 1000;
+
+ 
+
+    // 实际等待得时间
+
+    int wait_time = 0;
+
+    if (max==min)  // 判断是为了避免 %0错误，注意取随机值
+
+        wait_time = min*BASETIME;
+
+    else
+
+        wait_time = rand()%(max*BASETIME-min*BASETIME) + min*BASETIME;
+
+ 
+
+    // 最终显示的信息缓冲
+
+    char s_out[128];
+
+ 
+
+    // 读者大于0，写者小于0
+
+    if (nReader > 0)
+
+        sprintf(s_out, "Reader [%d]: %s\n", nReader, info);
+
+    else
+
+        sprintf(s_out, "\tWriter [%d]: %s\n", -nReader, info);
+
+ 
+
+    // 打印
+
+    printf(s_out);
+
+ 
+
+    // 然后等待
+
+    Sleep(wait_time);
+
+}
+
+ 
+
+// 这是主函数
+
+void TryReaderAndWriter()
+
+{
+
+    // 创建信号量      这是初值--+  +----这是最大信号量值
+
+    //                           |  |
+
+    Sdoc = CreateSemaphore(NULL, 1, 1, "Document");
+
+ 
+
+    // 一次最多允许 3 个读者读
+
+    Sr = CreateSemaphore(NULL, 3, 3, "ReaderNumber");
+
+ 
+
+    // 他也是一个互斥信号量，初值为 1
+
+    Scnt = CreateSemaphore(NULL, 1, 1, "ReaderCounterProtect");
+
+ 
+
+    // 线程句柄
+
+    HANDLE threads[RN+WN];
+
+ 
+
+    // 创建读者线程，共有 RN 个读者
+
+    for (int i=0; i<RN; i++)
+
+        threads[i] = CreateThread(0, 0, Reader, 0, 0, 0);
+
+ 
+
+    // 创建写者线程，共有 WN 个写者
+
+    for (int j=0; j<WN; j++)
+
+        threads[j+RN] = CreateThread(0, 0, Writer, 0, 0, 0);
+
+ 
+
+    WaitForMultipleObjects(RN+WN, threads, TRUE, INFINITE);
+
+}
+
+ 
+
+// 读者线程
+
+DWORD WINAPI Reader(LPVOID lpPara)
+
+{
+
+    // 注意是静态变量，可以使每来一个读者增加一
+
+    static int reader_num = 1;
+
+    int i = reader_num ++;
+
+ 
+
+    while (1)
+
+    {
+
+        JustWait(i, 1, 2, "I want to Read");
+
+       
+
+       // 读者未满
+
+        P(Sr);
+
+       
+
+       // 锁定读者计数器
+
+        P(Scnt);
+
+        printf("//: %d Readers in, [%d] in\n”, g_cntReader, i);
+
+        g_cntReader ++;
+
+       // 如果是第一个读者
+
+       if (g_cntReader == 1) 
+
+       {
+
+           JustWait(i, 1, 2, "I am NUMBER-ONE!");
+
+           // 锁定文档
+
+           P(Sdoc);
+
+           printf("#----------[%d] <== Doc busy\n", i);
+
+           JustWait(i, 1, 2, "I have get the document");
+
+       }
+
+       // 解锁读者计数器
+
+        V(Scnt);
+
+ 
+
+       // 读ing…………
+
+        JustWait(i, 2, 5, "I am reading...");
+
+       
+
+        JustWait(i, 1, 2, "I want to get out");
+
+ 
+
+       // 锁定读者计数器
+
+        P(Scnt);
+
+        g_cntReader --;
+
+       // 如果是最后一个
+
+       if (g_cntReader == 0) 
+
+       {
+
+           JustWait(i, 1, 2, "I am the LAST-ONE!");
+
+           printf("----------#[%d] ==> Doc free\n", i);
+
+           // 解锁文档
+
+           V(Sdoc);
+
+       }
+
+        printf("//: %d Readers Left, [%d] is out\n”, g_cntReader, i);
+
+       // 解锁读者计数器
+
+        V(Scnt);
+
+       
+
+       // 离开
+
+        V(Sr);
+
+ 
+
+        JustWait(i, 5, 3, "Rest^^^^^^^^^^^^");
+
+    }
+
+ 
+
+    return 0;
+
+}
+
+DWORD WINAPI Writer(LPVOID lpPara)
+
+{
+
+    // 注意是静态变量，可以使每来一个写者减去一，注意初值是负值
+
+    static int g_cnt = -1; 
+
+    int j = g_cnt --;
+
+ 
+
+    while (1)
+
+    {
+
+        JustWait(j, 2, 4, "I want write...");
+
+       
+
+       // 锁定文档
+
+        P(Sdoc);
+
+        printf("\t#==========[%d] <== Doc busy\n", -j);
+
+ 
+
+       // 写ing……
+
+        JustWait(j, 4, 3, "WRITING......");
+
+ 
+
+        JustWait(j, 1, 2, "write over! Out");
+
+        printf("\t==========#[%d] ==> Doc free\n", -j);
+
+ 
+
+       // 解锁文档
+
+        V(Sdoc);
+
+        JustWait(j, 8, 4, "Rest~~~~~~~~~~~~~");
+
+    }
+
+ 
+
+    return 0;
+
+}
+
+ 

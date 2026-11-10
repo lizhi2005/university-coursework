@@ -1,0 +1,99 @@
+客户端：
+#include <stdio.h>
+
+#define PIPE_NAME "\\\\cqu-zlh\\Pipe\\zhj"
+
+void main(void) {
+
+	HANDLE PipeHandle;
+	DWORD BytesWritten;
+
+	if (WaitNamedPipe(PIPE_NAME, NMPWAIT_WAIT_FOREVER) == 0)
+	{
+		printf("WaitNamedPipe failed with error %d\n",
+			GetLastError());
+		return;
+	}
+
+	// Create the named pipe file handle
+         //总是这里出错？？？？？
+	if ((PipeHandle = CreateFile(PIPE_NAME,
+		GENERIC_READ | GENERIC_WRITE, 0,
+		(LPSECURITY_ATTRIBUTES) NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		(HANDLE) NULL)) == INVALID_HANDLE_VALUE)
+	{
+		printf("CreateFile failed with error %d\n", GetLastError());
+		return;
+	}
+
+	if (WriteFile(PipeHandle, "This is a test", 14, &BytesWritten, 
+		NULL) == 0)
+	{
+		printf("WriteFile failed with error %d\n", GetLastError());
+		CloseHandle(PipeHandle);
+		return;
+	}
+
+	printf("Wrote %d bytes", BytesWritten);
+
+	CloseHandle(PipeHandle);
+}
+
+服务器端：
+DWORD WINAPI PipeInstanceProc(LPVOID lpParameter)
+{
+	HANDLE PipeHandle;
+	DWORD BytesRead;
+	DWORD BytesWritten;
+	CHAR Buffer[256];
+	static int i;
+
+	if ((PipeHandle = CreateNamedPipe("\\\\.\\PIPE\\jim",
+		PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
+		NUM_PIPES, 1024, 1024, 2000, NULL)) == INVALID_HANDLE_VALUE)
+	{
+		printf("CreateNamedPipe failed with error %d\n",
+			GetLastError());
+		return 0;
+	}
+
+	// Serve client connections forever
+	while(1) 
+	{
+		if (ConnectNamedPipe(PipeHandle, NULL) == 0)
+		{
+			printf("ConnectNamedPipe failed with error %d\n",
+				GetLastError());
+			break;
+		}
+
+		// Read data from and echo data to the client until
+		// the client is ready to stop
+		while(ReadFile(PipeHandle, Buffer, sizeof(Buffer),
+			&BytesRead,  NULL) > 0)
+		{
+			printf("Echo %d bytes to client\n", BytesRead);
+            printf("the thread%d", i++);
+			if (WriteFile(PipeHandle, Buffer, BytesRead,
+				&BytesWritten, NULL) == 0)
+			{
+				printf("WriteFile failed with error %d\n",
+					GetLastError());
+				break;
+			}
+		}
+
+		if (DisconnectNamedPipe(PipeHandle) == 0)
+		{
+			printf("DisconnectNamedPipe failed with error %d\n",
+				GetLastError());
+			break;
+		}
+		
+	}
+
+	CloseHandle(PipeHandle);
+	return 0;
+}
+

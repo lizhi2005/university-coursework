@@ -1,0 +1,13 @@
+	//找到接收消息的窗口(窗口名为Receiver)
+	CString str="进程B";
+	CWnd *pWnd=CWnd::FindWindow(NULL,str);
+	if(pWnd)
+	{
+		COPYDATASTRUCT buf;
+		char * s=new char[m_Msg1.GetLength()];   //m_Msg1为CString类型的变量
+		s=m_Msg1.GetBuffer(0);
+		
+		buf.cbData=strlen(s)+1;
+		buf.lpData=s;
+		pWnd->SendMessage(WM_COPYDATA,0,(LPARAM)&buf); //传送大量数据要用WM_COPYDATA消息
+	}
